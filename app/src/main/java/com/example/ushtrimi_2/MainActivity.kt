@@ -1,6 +1,8 @@
 package com.example.ushtrimi_2
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.ushtrimi_2.home.contacts.ContactsActivity
 import com.example.ushtrimi_2.reusableCoomposable.ReusableInputFiled
 import com.example.ushtrimi_2.ui.theme.Ushtrimi_2Theme
 import com.example.ushtrimi_2.utlis.validateUser
@@ -152,10 +155,8 @@ fun LoginRoute(innerPadding: PaddingValues, onSignUpClick: () -> Unit) {
         onShowPasswordChange = { showPassword = it },
         onLoginClick = {
             if (validateUser(email = email, password = password)) {
-                Toast.makeText(
-                    context, "Email and password from user are correct",
-                    Toast.LENGTH_LONG
-                ).show()
+                context.startActivity(Intent(context, ContactsActivity::class.java))
+                (context as? Activity)?.finish()
             } else {
                 showErrorAlert = true
             }
