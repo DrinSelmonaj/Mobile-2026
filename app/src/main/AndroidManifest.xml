@@ -30,6 +30,8 @@
             android:label="@string/title_activity_contacts"
             android:theme="@style/Theme.Ushtrimi_2"
             android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".home.gallery.GalleryActivity" />
+
     </application>
 
 </manifest>

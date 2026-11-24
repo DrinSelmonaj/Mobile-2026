@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.ushtrimi_2.home.contacts.ContactsActivity
+import com.example.ushtrimi_2.navigation.AppNavigation
 import com.example.ushtrimi_2.reusableCoomposable.ReusableInputFiled
 import com.example.ushtrimi_2.ui.theme.Ushtrimi_2Theme
 import com.example.ushtrimi_2.utlis.validateUser
@@ -64,20 +65,22 @@ class MainActivity : ComponentActivity() {
         setContent {
             Ushtrimi_2Theme {
                 // State hoisting: the current screen lives here, above both screens.
-                var showSignUp by rememberSaveable { mutableStateOf(false) }
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    if (showSignUp) {
-                        SignUpRoute(
-                            innerPadding = innerPadding,
-                            onBack = { showSignUp = false }
-                        )
-                    } else {
-                        LoginRoute(
-                            innerPadding = innerPadding,
-                            onSignUpClick = { showSignUp = true }
-                        )
-                    }
-                }
+//                var showSignUp by rememberSaveable { mutableStateOf(false) }
+//
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    if (showSignUp) {
+//                        SignUpRoute(
+//                            innerPadding = innerPadding,
+//                            onBack = { showSignUp = false }
+//                        )
+//                    } else {
+//                        LoginRoute(
+//                            innerPadding = innerPadding,
+//                            onSignUpClick = { showSignUp = true }
+//                        )
+//                    }
+//                }
+                AppNavigation()
             }
         }
     }
