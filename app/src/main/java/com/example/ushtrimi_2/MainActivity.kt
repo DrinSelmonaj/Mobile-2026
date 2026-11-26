@@ -1,5 +1,6 @@
 package com.example.ushtrimi_2
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -63,10 +67,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             Ushtrimi_2Theme {
                 AppNavigation()
-               /* Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(innerPadding )
-
-                }*/
             }
         }
     }
@@ -125,22 +125,74 @@ fun GreetingPreview() {
     }
 }
 
+/** Stateful wrapper: owns the Login state and passes it down to the stateless [LoginScreen]. */
 @Composable
-fun LoginScreen(
-    onLoginSuccessfully: ()-> Unit
+fun LoginRoute(
+    innerPadding: PaddingValues,
+    onLoginSuccessfully: () -> Unit,
+    onSignUpClick: () -> Unit
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    val context = LocalContext.current
+    var showPassword by rememberSaveable { mutableStateOf(false) }
     var showErrorAlert by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
+    LoginScreen(
+        innerPadding = innerPadding,
+        email = email,
+        password = password,
+        showPassword = showPassword,
+        onEmailChange = { email = it },
+        onPasswordChange = { password = it },
+        onShowPasswordChange = { showPassword = it },
+        onLoginClick = {
+            if (validateUser(email = email, password = password)) {
+                Toast.makeText(
+                    context, "Email and password from user are correct", Toast.LENGTH_LONG
+                ).show()
+                onLoginSuccessfully()
+            } else {
+                showErrorAlert = true
+            }
+        },
+        onSignUpClick = onSignUpClick
+    )
+
+    if (showErrorAlert) {
+        AlertDialog(
+            title = { Text(text = "Something went wrong") },
+            text = { Text(text = "Please check your email  or password ") },
+            onDismissRequest = { showErrorAlert = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorAlert = false }) { Text(text = "Ok") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showErrorAlert = false }) { Text(text = "Cancel") }
+            }
+        )
+    }
+}
+
+/** Stateless: everything comes in as parameters, events go out as lambdas. */
+@Composable
+fun LoginScreen(
+    innerPadding: PaddingValues,
+    email: String,
+    password: String,
+    showPassword: Boolean,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onShowPasswordChange: (Boolean) -> Unit,
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit
+) {
     Box(
         modifier = Modifier
-            .padding(/*innerPadding*/)
+            .padding(innerPadding)
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -158,70 +210,51 @@ fun LoginScreen(
                 text = stringResource(R.string.welcome_back),
                 style = MaterialTheme.typography.headlineLarge
             )
-            //email
+
             ReusableInputFiled(
                 value = email,
-                event = {enteredEmail->
-                  email = enteredEmail
-                },
+                event = onEmailChange,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 label = stringResource(R.string.email)
             )
 
-            //password
             ReusableInputFiled(
-               value = password,
-               event = {eneteredPassword->
-                   password = eneteredPassword
-               },
-               keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-               visualTransformation = PasswordVisualTransformation(),
-               label = stringResource(R.string.password)
-           )
+                value = password,
+                event = onPasswordChange,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (showPassword) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                label = stringResource(R.string.password)
+            )
 
-            Button(
-                onClick = {
-                    if (validateUser(email = email, password = password)){
-                        Toast.makeText(context,"Email and password from user are correct",
-                            Toast.LENGTH_LONG).show();
-                        onLoginSuccessfully.invoke()
-                    }else{
-                       showErrorAlert = true
-                    }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(checked = showPassword, onCheckedChange = onShowPasswordChange)
+                Text(text = "Show password")
+            }
 
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
-                enabled = !email.isBlank() && !password.isBlank()
+                    .padding(vertical = 32.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(text = stringResource(R.string.login))
+                Button(
+                    onClick = onLoginClick,
+                    modifier = Modifier.weight(1f),
+                    enabled = email.isNotBlank() && password.isNotBlank()
+                ) {
+                    Text(text = stringResource(R.string.login))
+                }
+                OutlinedButton(
+                    onClick = onSignUpClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "Sign Up")
+                }
             }
         }
     }
-
-    if (showErrorAlert){
-        AlertDialog(
-            title = {Text(text = "Something went wrong")},
-            text = {Text(text = "Please check your email  or password ")},
-            onDismissRequest = {
-                showErrorAlert = false
-            },
-            confirmButton ={
-                TextButton(onClick = {showErrorAlert = false}) {
-                    Text(text = "Ok")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {showErrorAlert = false}) {
-                    Text(text = "Cancel")
-                }
-            }
-        )
-    }
-
-
-
-
-
 }
